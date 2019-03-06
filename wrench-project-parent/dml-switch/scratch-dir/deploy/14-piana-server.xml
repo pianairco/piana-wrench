@@ -1,0 +1,12 @@
+<qserver name="piana-server" logger="Q2">
+    <attr name="port" type="java.lang.Integer">8001</attr>
+    <channel name="xml.channel"
+             class="org.jpos.iso.channel.ASCIIChannel"
+             packager="org.jpos.iso.packager.ISO87BPackager">
+    </channel>
+    <!--<request-listener class="my.request.Listener" logger="Q2">-->
+        <!--<property name="my-property" value="ABC" />-->
+        <!--<property name="my-other-property" value="XYZ" />-->
+    <!--</request-listener>-->
+    <out>transaction-manager-queue</out>
+</qserver>

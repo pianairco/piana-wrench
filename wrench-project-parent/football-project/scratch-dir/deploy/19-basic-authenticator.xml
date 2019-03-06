@@ -1,0 +1,7 @@
+<qbean name="basic-authenticator"
+       class="ir.piana.dev.wrench.module.basicauth.BasicAuthenticationModule"
+       logger="Q2">
+    <property name="qp-space" value="tspace:default" />
+    <property name="qp-in" value="qp-http-request-multiplexor-module-in" />
+    <property name="qp-will-be-registered" value="true" />
+</qbean>

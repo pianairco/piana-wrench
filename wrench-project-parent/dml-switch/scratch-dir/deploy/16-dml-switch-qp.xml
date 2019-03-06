@@ -1,0 +1,8 @@
+<qbean name="qp-dml-switch"
+       class="ir.piana.dev.project.dmlswitch.module.DmlSwitchModule"
+       logger="Q2">
+    <qp-space>tspace:default</qp-space>
+    <property name="qp-in" value="dml-switch-in" />
+    <property name="qp-out" value="transaction-manager-queue" />
+
+</qbean>

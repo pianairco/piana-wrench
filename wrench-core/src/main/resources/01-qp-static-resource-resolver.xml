@@ -1,0 +1,8 @@
+<qbean name="qp-resource-resolver"
+       class="ir.piana.dev.wrench.rest.httpmodule.QPStaticResourceResolverModule"
+       logger="Q2" >
+    <qp-space>tspace:default</qp-space>
+    <property name="qp-in" value="qp-http-server-in" />
+    <property name="qp-out" value="qp-http-request-multiplexor-module-in" />
+    <property name="root-path" value="asset" />
+</qbean>

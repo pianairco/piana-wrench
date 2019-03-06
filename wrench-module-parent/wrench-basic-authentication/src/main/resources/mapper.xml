@@ -1,0 +1,10 @@
+<mapper>
+<qp-repository name="p1"
+               spring-context="default"
+               scope="singleton"
+               class="ir.piana.dev.wrench.module.basicauth.handler.BasicUserHandler"/>
+
+<qp-handler url="user" method="post"
+            repository="p1" handler="signUp"
+            roles="" />
+</mapper>

@@ -1,0 +1,15 @@
+**/.idea
+*.iml
+**/*.iml
+**/target
+**/target/*
+**/node_modules
+**/*.log
+**/classes
+**/classes/*
+dependency-reduced-pom.xml
+**/ssl
+**/ssl/*
+**/log
+**/log/*
+

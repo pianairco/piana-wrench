@@ -1,0 +1,9 @@
+<qbean class="ir.piana.dev.wrench.module.httpserver.grizzly.QPGrizzlyHttpServerModule"
+       logger="Q2" >
+    <qp-space>tspace:default</qp-space>
+    <property name="qp-in" value="qp-http-server-in" />
+    <property name="qp-out" value="qp-http-request-multiplexor-module-in" />
+
+    <host>localhost</host>
+    <port>9090</port>
+</qbean>

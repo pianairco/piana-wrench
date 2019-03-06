@@ -1,0 +1,11 @@
+<qbean name="qp-resource-resolver"
+       class="ir.piana.dev.wrench.context.module.QPSpringContextProviderModule"
+       logger="Q2" >
+    <qp-space>tspace:default</qp-space>
+    <property name="qp-in" value="qp-http-server-in" />
+    <property name="qp-out" value="qp-http-request-multiplexor-module-in" />
+    <property name="root-path" value="asset" />
+
+    <!--<config-bean>ir.piana.dev.jpos.qp.module.auth.data.QpConfig</config-bean>-->
+    <!--<config-package>ir.piana.dev.jpos.qp.module.auth.data.dao</config-package>-->
+</qbean>

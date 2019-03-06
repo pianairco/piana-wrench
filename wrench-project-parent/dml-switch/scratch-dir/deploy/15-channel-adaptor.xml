@@ -1,0 +1,20 @@
+<channel-adaptor name="upstream-channel-rx-tx" logger="Q2">
+    <channel class="org.jpos.iso.channel.ASCIIChannel"
+             packager="org.jpos.iso.packager.ISO87BPackager">
+        <!--packager="org.jpos.iso.packager.GenericPackager-->
+        <!--<property name="packager-config"-->
+                  <!--value="jar:packager/iso87binary.xml" />-->
+        <property name="host" value="127.0.0.1" />
+        <property name="port" value="8001" />
+        <property name="timeout" value="30000" />
+        <!--<filter-->
+                <!--class="org.jpos.iso.filter.YourIncomingFilter"-->
+                <!--direction="incoming" />-->
+        <!--<filter-->
+                <!--class="org.jpos.iso.filter.YourOutgoingFilter"-->
+                <!--direction="outgoing" />-->
+    </channel>
+    <in>upstream-channel-in</in>
+    <out>your-channel-receive</out>
+    <reconnect-delay>10000</reconnect-delay>
+</channel-adaptor>

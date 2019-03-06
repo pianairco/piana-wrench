@@ -1,0 +1,30 @@
+<qbean name="http-service-mapper"
+       class="ir.piana.dev.wrench.rest.http.module.QPHttpServiceMapperModule"
+       logger="Q2">
+    <property name="qp-space" value="tspace:default" />
+    <property name="qp-in" value="qp-http-request-multiplexor-module-in" />
+    <property name="qp-will-be-registered" value="true" />
+
+    <qp-authenticator module-name="basic-authenticator" />
+    <qp-authorizer module-name="basic-authorizer" />
+
+    <qp-spring-context>default</qp-spring-context>
+
+    <qp-repository name="p1"
+                   spring-context="default"
+                   scope="singleton"
+                   class="ir.piana.dev.wrench.module.basicauth.handler.BasicUserHandler"/>
+    <qp-repository name="p2"
+                   spring-context="default"
+                   scope="singleton"
+                   class="ir.piana.dev.wrench.rest.http.repo.QPUtilRepository"/>
+
+    <qp-handler url="user" method="post"
+                repository="p1" handler="signUp"
+                roles="" />
+    <qp-handler url="/**" method="get"
+                repository="p2" handler="staticResourceHandler"
+                roles="">
+        <property name="static-resolver-module-name" value="qp-resource-resolver" />
+    </qp-handler>
+</qbean>

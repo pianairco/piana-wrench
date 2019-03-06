@@ -1,0 +1,41 @@
+<qbean name="qp-entity-manager-qp"
+       class="ir.piana.dev.wrench.core.module.QPEntityManagerFactoryProviderModule"
+       logger="Q2">
+    <!--<property name="qp-space" value="tspace:default" />-->
+    <!--<property name="qp-in" value="qp-httpmodule-request-multiplexor-module-in" />-->
+
+    <datasource name="datasource-qp">
+        <database-platform>mysql</database-platform>
+        <jdbc-url>jdbc:mysql://localhost:3306/qp</jdbc-url>
+        <driver-class-name>com.mysql.cj.jdbc.Driver</driver-class-name>
+        <user>root</user>
+        <password></password>
+        <sid></sid>
+        <pool-size>100</pool-size>
+    </datasource>
+
+    <entity-manager-factory name="qp-entity-manager-factory">
+        <database-platform>mysql</database-platform>
+        <jpa-provider>eclipselink</jpa-provider>
+        <!--<persistence-unit-name>qp-pu</persistence-unit-name>-->
+        <base-package>ir.piana.dev.wrench.rest.authenticate.entity</base-package>
+        <base-package>ir.piana.dev.wrench.module.basicauth.entity</base-package>
+        <base-package>ir.piana.dev.project.football.data.entity</base-package>
+    </entity-manager-factory>
+
+
+
+    <!--<qp-identity-management-type>in-memory</qp-identity-management-type>-->
+    <!--<qp-authorization-provider-type>basic</qp-authorization-provider-type>-->
+    <!--<qp-user>-->
+        <!--<username>user1</username>-->
+        <!--<password>123</password>-->
+        <!--<identity>user1</identity>-->
+    <!--</qp-user>-->
+    <!--<qp-user>-->
+        <!--<username>user2</username>-->
+        <!--<password>321</password>-->
+        <!--<identity>user2</identity>-->
+    <!--</qp-user>-->
+
+</qbean>
