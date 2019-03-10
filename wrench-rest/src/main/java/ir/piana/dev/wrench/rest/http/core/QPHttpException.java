@@ -19,10 +19,12 @@ public class QPHttpException extends QPException {
         this.description = description != null ? description : "";
     }
 
-    public void applyResponse(QPHttpResponse response) {
-        response.setHttpStatus(status);
-        response.setEntity(description);
-        response.setMediaType(QPHttpMediaType.TEXT_PLAIN);
+    public void applyResponse(QPHttpResponseBuilder response) {
+        QPHttpResponse qpResponse = new QPHttpResponse();
+        qpResponse.setHttpStatus(status);
+        qpResponse.setEntity(description);
+        qpResponse.setMediaType(QPHttpMediaType.TEXT_PLAIN);
+        response.setQPHttpResponse(qpResponse);
         response.apply();
     }
 }

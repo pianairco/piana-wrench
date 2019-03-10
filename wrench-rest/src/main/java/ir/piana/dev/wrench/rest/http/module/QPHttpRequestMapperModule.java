@@ -4,13 +4,12 @@ import ir.piana.dev.wrench.core.QPException;
 import ir.piana.dev.wrench.core.module.QPBaseModule;
 import ir.piana.dev.wrench.rest.authenticate.AuthenticateService;
 import ir.piana.dev.wrench.rest.authenticate.entity.PrincipalEntity;
-import ir.piana.dev.wrench.rest.authenticate.repo.PrincipalRepository;
-import ir.piana.dev.wrench.rest.authorize.QPRoleProvider;
 import ir.piana.dev.wrench.rest.authorize.QPRoleManagerModule;
 import ir.piana.dev.wrench.rest.authorize.QPRoleProvidable;
-import ir.piana.dev.wrench.rest.http.core.*;
+import ir.piana.dev.wrench.rest.authorize.QPRoleProvider;
 import ir.piana.dev.wrench.rest.http.construct.QPHandlerConstruct;
 import ir.piana.dev.wrench.rest.http.construct.QPRepositoryConstruct;
+import ir.piana.dev.wrench.rest.http.core.*;
 import ir.piana.dev.wrench.rest.http.util.QPHttpInjectableConfigImpl;
 import org.jdom2.Element;
 import org.jpos.q2.QBean;
@@ -22,15 +21,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-public class QPHttpServiceMapperModule
+public class QPHttpRequestMapperModule
         extends QPBaseModule
         implements SpaceListener<String, Context> {
-    private Map<String, Class> repoMap = new LinkedHashMap<>();
     private Map<String, QPHttpRepositoryManager> repositoryManagerMap
             = new LinkedHashMap<>();
-    private Map<String, QPHandlerConstruct> handlerConstructMap =
+    protected Map<String, QPRequestHandler> requestHandlerMap =
             new LinkedHashMap<>();
-    protected Map<String, QPHandlerConstruct> httpAsteriskHandlerConstructMap =
+    protected Map<String, QPRequestHandler> asteriskRequestHandlerMap =
             new LinkedHashMap<>();
 
 //    protected QPHttpAuthenticator authenticator;
@@ -96,7 +94,7 @@ public class QPHttpServiceMapperModule
                             repositoryConstruct.getName() +
                             "not implemented QPHttpRepository interface!");
                 repositoryManagerMap.put(repositoryConstruct.getName(),
-                        QPHttpRepositoryManagerBuilder.build(repositoryConstruct));
+                        new QPHttpRepositoryManager(repositoryConstruct));
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (QPException e) {
@@ -128,23 +126,6 @@ public class QPHttpServiceMapperModule
             handlerConstruct.setHandlerConfig(QPHttpInjectableConfigImpl
                     .build(handlerElement.getChildren("property")));
 
-            if (url.contains("**")) {
-                handlerConstruct.setUrl(url.substring(
-                        0, url.indexOf("/**")));
-                httpAsteriskHandlerConstructMap.put(
-                        handlerConstruct.getMethod()
-                                .concat(":")
-                                .concat(url.substring(0, url.indexOf("/**"))),
-                        handlerConstruct);
-            } else {
-                handlerConstruct.setUrl(url);
-                handlerConstructMap.put(
-                        handlerConstruct.getMethod()
-                                .concat(":")
-                                .concat(handlerConstruct.getUrl()),
-                        handlerConstruct);
-            }
-
             QPRoleManagerModule roleManagerModule = null;
             if (authorizerModuleName != null)
                 roleManagerModule = QPBaseModule
@@ -158,6 +139,47 @@ public class QPHttpServiceMapperModule
                 }
             } else {
                 handlerConstruct.setRolesId(0l);
+            }
+
+            try {
+                QPRequestHandler requestHandler = null;
+                if(handlerConstruct.getRepoManager()
+                        .isWithoutPrincipal(handlerName)) {
+                    QPHttpHandlerWithoutPrincipal qpHttpHandlerWithoutPrincipal =
+                            handlerConstruct.getRepoManager()
+                                    .resolveWithoutPrincipal(handlerName);
+
+                    requestHandler = new QPRequestHandlerWithoutPrincipal(
+                            handlerConstruct);
+                } else if (handlerConstruct.getRepoManager()
+                        .isWithPrincipal(handlerName)) {
+                    QPHttpHandlerWithPrincipal qpHttpHandlerWithPrincipal =
+                            handlerConstruct.getRepoManager()
+                                    .resolveWithPrincipal(handlerName);
+                    requestHandler = new QPRequestHandlerWithPrincipal(
+                            authenticatorModuleName,
+                            authorizerModuleName,
+                            handlerConstruct);
+                }
+
+                if (url.contains("**")) {
+                    handlerConstruct.setUrl(url.substring(
+                            0, url.indexOf("/**")));
+                    asteriskRequestHandlerMap.put(handlerConstruct.getMethod()
+                                    .concat(":")
+                                    .concat(url.substring(0, url.indexOf("/**"))),
+                            requestHandler);
+                } else {
+                    handlerConstruct.setUrl(url);
+                    requestHandlerMap.put(
+                            handlerConstruct.getMethod()
+                                    .concat(":")
+                                    .concat(handlerConstruct.getUrl()),
+                            requestHandler);
+                }
+
+            } catch (QPException e) {
+                e.printStackTrace();
             }
         });
     }
@@ -201,19 +223,18 @@ public class QPHttpServiceMapperModule
 
     protected void processRequest(Context context) {
         QPHttpRequest request = null;
-        QPHttpResponse response = null;
+        QPHttpResponseBuilder responseBuilder = null;
         try {
             request = context.get("qp-httpmodule-request");
-            response = context.get("qp-httpmodule-response");
+            responseBuilder = context.get("qp-httpmodule-response");
             String requestKey = request.getMethodType().getName()
                     .concat(":")
                     .concat(request.getRequestURI());
-            QPHandlerConstruct handlerConstruct = handlerConstructMap
-                    .get(requestKey);
+            QPRequestHandler requestHandler = requestHandlerMap.get(requestKey);
             String asteriskPath = "";
-            if (handlerConstruct == null) {
+            if (requestHandler == null) {
                 String selectedKey = "";
-                for (String key : httpAsteriskHandlerConstructMap.keySet()) {
+                for (String key : asteriskRequestHandlerMap.keySet()) {
                     if (requestKey.startsWith(key)) {
                         if (selectedKey.length() < key.length()) {
                             selectedKey = key;
@@ -221,103 +242,29 @@ public class QPHttpServiceMapperModule
                     }
                 }
                 if (!selectedKey.isEmpty()) {
-                    handlerConstruct = httpAsteriskHandlerConstructMap
+                    requestHandler = asteriskRequestHandlerMap
                             .get(selectedKey);
                     asteriskPath = requestKey.substring(selectedKey.length());
                     request.setAsteriskPath(asteriskPath);
                 }
             }
-            if(handlerConstruct != null) {
-                QPHttpAuthenticated qpHttpAuthenticated = authenticateHttpHandler(
-                        handlerConstruct,
-                        request, response);
-                if(handlerConstruct.getRolesId() > 0)
-                    if(!authorizeHttpHandler(handlerConstruct, qpHttpAuthenticated))
-                        throw new QPHttpException(QPHttpStatus.UNAUTHORIZED_401);
-
-                invokeHttpHandler(qpHttpAuthenticated,
-                        handlerConstruct,
-                        request, response);
+            if(requestHandler != null) {
+                QPHttpResponse response = requestHandler.handle(request);
+                responseBuilder.setQPHttpResponse(response);
+                responseBuilder.apply();
             } else {
                 throw new QPHttpException(QPHttpStatus.NOT_FOUND_404);
             }
         } catch (QPHttpException e) {
-            e.applyResponse(response);
+            e.applyResponse(responseBuilder);
         } catch (QPException e) {
             new QPHttpException(
                     QPHttpStatus.INTERNAL_SERVER_ERROR_500)
-                    .applyResponse(response);
+                    .applyResponse(responseBuilder);
         } catch (Exception e) {
             new QPHttpException(
                     QPHttpStatus.INTERNAL_SERVER_ERROR_500)
-                    .applyResponse(response);
+                    .applyResponse(responseBuilder);
         }
     }
-
-    protected QPHttpAuthenticated authenticateHttpHandler(
-            QPHandlerConstruct handlerConstruct,
-            QPHttpRequest request, QPHttpResponse response)
-            throws QPException {
-        if(authenticatorModuleName != null) {
-            QPHttpAuthenticator module = QPBaseModule
-                    .getModule(authenticatorModuleName, QPHttpAuthenticator.class);
-            QPHttpAuthenticated authenticated = module.authenticate(request);
-            return authenticated;
-        }
-        return null;
-    }
-
-    protected boolean authorizeHttpHandler(
-            QPHandlerConstruct handlerConstruct,
-            QPHttpAuthenticated authenticated)
-            throws QPException {
-        if(authenticated != null) {
-            if (authorizerModuleName != null) {
-                QPRoleManagerModule roleManagerModule = QPBaseModule
-                        .getModule(authorizerModuleName,
-                                QPRoleManagerModule.class);
-                if (!roleManagerModule.isRegistered(
-                        authenticated.getPrincipal()))
-                    roleManagerModule.registerPrincipalRoles(
-                            authenticated.getPrincipal(),
-                            authenticated.getAuthenticatedRoles());
-                long l = roleManagerModule.hasAnyRole(
-                        authenticated.getPrincipal(),
-                        handlerConstruct.getRolesId());
-                if(l > 0)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    protected void invokeHttpHandler(QPHttpAuthenticated authenticated,
-                                     QPHandlerConstruct handlerConstruct,
-                                     QPHttpRequest request, QPHttpResponse response)
-            throws QPException {
-        PrincipalEntity principal = null;
-        if(authenticated!= null)
-            principal = authenticated.getPrincipal();
-        handlerConstruct.getRepoManager()
-                .resolve(handlerConstruct.getHandlerName())
-                .handle(principal, handlerConstruct.getHandlerConfig(),
-                        request, response);
-        response.apply();
-    }
-
-//    protected void invokeHttpOperator(
-//            QPServiceConstruct serviceConstruct,
-//            QPHttpRequest request, QPHttpResponse response)
-//            throws Exception {
-//        String[] split = serviceConstruct.getHandler().split(":");
-//        String handlerClass = pkgMap.get(
-//                serviceConstruct.getPkgName())
-//                .concat(".")
-//                .concat(split[0]);
-//        Class<?> aClass = Class.forName(handlerClass);
-//        Method method = aClass.getMethod(
-//                split[1], QPHttpRequest.class, QPHttpResponse.class);
-//        method.invoke(null, request, response);
-//        response.apply();
-//    }
 }

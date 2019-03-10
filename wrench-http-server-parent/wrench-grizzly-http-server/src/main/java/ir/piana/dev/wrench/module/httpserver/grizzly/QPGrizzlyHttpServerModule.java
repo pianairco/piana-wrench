@@ -33,11 +33,34 @@ public class QPGrizzlyHttpServerModule extends QPBaseModule {
                         context.put("qp-httpmodule-request",
                                 new QPGrizzlyHttpRequest(request));
                         context.put("qp-httpmodule-response",
-                                new QPGrizzlyHttpResponse(response));
+                                new QPGrizzlyHttpResponseBuilder(response));
                         out(context);
                     }
                 });
     }
+
+//    @Override
+//    protected void initBeforeRegisterQPModule() throws Exception {
+//        server = new HttpServer();
+//        final ServerConfiguration config = server.getServerConfiguration();
+//        final NetworkListener listener =
+//                new NetworkListener("grizzly",
+//                        host,
+//                        port);
+//        server.addListener(listener);
+//        server.getServerConfiguration().addHttpHandler(
+//                new HttpHandler() {
+//                    public void service(Request request, Response response) throws Exception {
+//                        response.suspend();
+//                        Context context = new Context();
+//                        context.put("qp-httpmodule-request",
+//                                new QPGrizzlyHttpRequest(request));
+//                        context.put("qp-httpmodule-response",
+//                                new QPGrizzlyHttpResponseBuilder(response));
+//                        out(context);
+//                    }
+//                });
+//    }
 
     @Override
     protected void configForSpringContext() throws Exception {

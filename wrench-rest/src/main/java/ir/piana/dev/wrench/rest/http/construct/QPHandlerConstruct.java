@@ -2,7 +2,7 @@ package ir.piana.dev.wrench.rest.http.construct;
 
 import ir.piana.dev.wrench.rest.authorize.QPRoleProvidable;
 import ir.piana.dev.wrench.rest.http.core.QPHttpInjectableConfig;
-import ir.piana.dev.wrench.rest.http.core.QPHttpRepositoryManager;
+import ir.piana.dev.wrench.rest.http.module.QPHttpRepositoryManager;
 
 import java.util.List;
 

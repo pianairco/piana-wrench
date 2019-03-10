@@ -1,5 +1,5 @@
 <qbean name="http-service-mapper"
-       class="ir.piana.dev.wrench.rest.http.module.QPHttpServiceMapperModule"
+       class="ir.piana.dev.wrench.rest.http.module.QPHttpRequestMapperModule"
        logger="Q2">
     <property name="qp-space" value="tspace:default" />
     <property name="qp-in" value="qp-http-request-multiplexor-module-in" />
