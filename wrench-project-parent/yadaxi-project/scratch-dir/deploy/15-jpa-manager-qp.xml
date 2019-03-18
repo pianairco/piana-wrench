@@ -6,7 +6,7 @@
 
     <datasource name="datasource-qp">
         <database-platform>mysql</database-platform>
-        <jdbc-url>jdbc:mysql://localhost:3306/qp</jdbc-url>
+        <jdbc-url>jdbc:mysql://localhost:3306/yadaxi</jdbc-url>
         <driver-class-name>com.mysql.cj.jdbc.Driver</driver-class-name>
         <user>root</user>
         <password></password>

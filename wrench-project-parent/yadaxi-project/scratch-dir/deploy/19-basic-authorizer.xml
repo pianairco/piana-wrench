@@ -1,0 +1,7 @@
+<qbean name="basic-authorizer"
+       class="ir.piana.dev.wrench.rest.authorize.QPRoleManagerModule"
+       logger="Q2">
+    <property name="qp-space" value="tspace:default" />
+    <property name="qp-in" value="qp-role-manager-module-in" />
+    <property name="qp-will-be-registered" value="true" />
+</qbean>

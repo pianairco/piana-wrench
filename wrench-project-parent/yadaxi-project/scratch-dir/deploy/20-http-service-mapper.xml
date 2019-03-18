@@ -21,7 +21,7 @@
     <qp-repository name="p3"
                    spring-context="default"
                    scope="singleton"
-                   class="ir.piana.dev.project.football.handler.FootballHandler"/>
+                   class="ir.piana.dev.project.yadaxi.handler.YadaxiHandler"/>
 
     <qp-handler url="user" method="post"
                 repository="p1" handler="signUp"
