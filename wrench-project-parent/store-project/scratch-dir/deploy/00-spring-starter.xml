@@ -1,0 +1,9 @@
+<qbean name="spring-starter-module"
+       class="ir.piana.dev.wrench.core.module.QPSpringContextStarterModule"
+       logger="Q2" >
+    <qp-space>tspace:default</qp-space>
+    <property name="qp-in" value="sample-module-in" />
+    <property name="qp-out" value="sample-module-out" />
+
+    <spring-context-xml-resource context-name="default" resource-name="applicationContext"/>
+</qbean>

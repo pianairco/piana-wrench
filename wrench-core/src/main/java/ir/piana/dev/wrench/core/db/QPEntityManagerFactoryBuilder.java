@@ -93,6 +93,10 @@ public final class QPEntityManagerFactoryBuilder {
                 entityManagerFactoryInfo.getDatabasePlatform()));
         factory.getJpaPropertyMap()
                 .put("eclipselink.weaving", "false");
+        factory.getJpaPropertyMap()
+                .put("javax.persistence.query.timeout", "100");
+        factory.getJpaPropertyMap()
+                .put("javax.persistence.lock.timeout", "100");
 //        factory.setPersistenceUnitName(entityManagerFactoryInfo.getPersistenceUnitName());
         factory.setPackagesToScan(entityManagerFactoryInfo.getBasePackages());
 
